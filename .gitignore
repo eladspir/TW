@@ -5,6 +5,7 @@ HowTo
 already-followed.csv
 ignore-users.csv
 already-fav.csv
+main.py
 
 ## Extensions
 *.pyc
