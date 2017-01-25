@@ -50,7 +50,6 @@ def auto_fav(q, count=100, result_type="recent"):
 
     all_favs = get_already_favs()
     ignored_users = get_ignore_users()
-    print (ignored_users)
     
     f_out = open(ALREADY_FAV_FILE, 'a')
 
@@ -59,7 +58,6 @@ def auto_fav(q, count=100, result_type="recent"):
     for tweet in result["statuses"]:
         try:
 
-            print (tweet["user"]["screen_name"])
 
             # don't favorite your own tweets
             if tweet["user"]["screen_name"] == TWITTER_HANDLE:
