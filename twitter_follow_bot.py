@@ -29,6 +29,7 @@ from twitter_info import *
 # list in
 ALREADY_FOLLOWED_FILE = "already-followed.csv"
 ALREADY_FAV_FILE = "already-fav.csv"
+IGNORE_USERS_FILE = "ignore-users.csv"
 
 t = Twitter(auth=OAuth(OAUTH_TOKEN, OAUTH_SECRET,
             CONSUMER_KEY, CONSUMER_SECRET))
@@ -47,7 +48,8 @@ def auto_fav(q, count=100, result_type="recent"):
         Favorites tweets that match a certain phrase (hashtag, word, etc.)
     """
 
-    all_favs = get_already_favs();
+    all_favs = get_already_favs()
+    ignored_users = get_ignore_users()
     
     f_out = open(ALREADY_FAV_FILE, 'a')
 
@@ -61,6 +63,9 @@ def auto_fav(q, count=100, result_type="recent"):
                 continue
 
             if (was_favorited(tweet["id"], all_favs)):
+                continue
+
+            if in_numeric_list(tweet["user"]["id"], ignored_users):
                 continue
 
             add_favorite_to_file(tweet["id"], f_out)
@@ -77,17 +82,24 @@ def auto_fav(q, count=100, result_type="recent"):
     f_out.close()
 
 def get_already_favs():
-    all_favs = []
-    
-    # Read all favs file
-    if not os.path.isfile(ALREADY_FAV_FILE):
-        with open(ALREADY_FAV_FILE, "w") as out_file:
+   return get_list_from_file(ALREADY_FAV_FILE)
+
+def get_ignore_users():
+    return get_list_from_file(IGNORE_USERS_FILE)
+
+def get_list_from_file(path):
+
+    list = []
+
+     # Read all favs file
+    if not os.path.isfile(path):
+        with open(path, "w") as out_file:
             out_file.write("")
-    with open(ALREADY_FAV_FILE, 'r') as in_file:
+    with open(path, 'r') as in_file:
         for line in in_file:
             all_favs.append(int(line))
 
-    return all_favs
+    return list
 
 def auto_rt(q, count=100, result_type="recent"):
     """
@@ -167,7 +179,7 @@ def auto_follow_followers_for_user(user_screen_name, count=100):
         Follows the followers of a user
     """
     following = set(t.friends.ids(screen_name=TWITTER_HANDLE)["ids"])
-    followers_for_user = set(t.followers.ids(screen_name=user_screen_name)["ids"][:count]);
+    followers_for_user = set(t.followers.ids(screen_name=user_screen_name)["ids"][:count])
     do_not_follow = get_do_not_follow_list()
     
     for user_id in followers_for_user:
@@ -260,8 +272,11 @@ def set_already_followed_file():
             out_file.write(str(val) + "\n")
 
 def was_favorited(tweet_id, all_tweets):
-    for line in all_tweets:
-        if tweet_id == int(line):
+    return in_numeric_list(tweet_id, all_tweets)
+
+def in_numeric_list(id, list):
+    for line in list:
+        if id == int(line):
             return True
 
     return False
