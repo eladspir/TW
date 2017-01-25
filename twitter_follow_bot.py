@@ -50,14 +50,17 @@ def auto_fav(q, count=100, result_type="recent"):
 
     all_favs = get_already_favs()
     ignored_users = get_ignore_users()
+    print (ignored_users)
     
     f_out = open(ALREADY_FAV_FILE, 'a')
 
     result = search_tweets(q, count, result_type)
 
-
     for tweet in result["statuses"]:
         try:
+
+            print (tweet["user"]["screen_name"])
+
             # don't favorite your own tweets
             if tweet["user"]["screen_name"] == TWITTER_HANDLE:
                 continue
@@ -76,8 +79,8 @@ def auto_fav(q, count=100, result_type="recent"):
         # when you have already favorited a tweet, this error is thrown
         except TwitterHTTPError as e:
             print("error: %s" % (str(e)))
-            print("error in user:" tweet["user"]["screen_name"])
-            print("error in tweet id:" tweet["id"])
+            print("error in user:" + tweet["user"]["screen_name"])
+            print("error in tweet id:" + str(tweet["id"]))
 
     f_out.close()
 
@@ -97,7 +100,7 @@ def get_list_from_file(path):
             out_file.write("")
     with open(path, 'r') as in_file:
         for line in in_file:
-            all_favs.append(int(line))
+            list.append(int(line))
 
     return list
 
