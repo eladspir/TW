@@ -2,6 +2,9 @@ twitter_info.py
 Tempdrop/
 Chooze/
 HowTo
+already-followed.csv
+ignore-users.csv
+already-fav.csv
 
 ## Extensions
 *.pyc
