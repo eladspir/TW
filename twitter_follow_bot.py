@@ -71,6 +71,8 @@ def auto_fav(q, count=100, result_type="recent"):
         # when you have already favorited a tweet, this error is thrown
         except TwitterHTTPError as e:
             print("error: %s" % (str(e)))
+            print("error in user:" tweet["user"]["screen_name"])
+            print("error in tweet id:" tweet["id"])
 
     f_out.close()
 
