@@ -62,7 +62,6 @@ def auto_fav(q, count=100, result_type="recent", to_follow = False):
 
     for tweet in result["statuses"]:
         try:
-            print(tweet["user"]["screen_name"])
 
             # don't favorite your own tweets
             if tweet["user"]["screen_name"] == TWITTER_HANDLE:
