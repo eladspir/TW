@@ -42,22 +42,27 @@ def search_tweets(q, count=100, result_type="recent"):
 
     return t.search.tweets(q=q, result_type=result_type, count=count)
 
+def auto_fav_n_follow(q, count=100, result_type="recent"):
+    auto_fav(q, count, result_type, True)
+ 
 
-def auto_fav(q, count=100, result_type="recent"):
+def auto_fav(q, count=100, result_type="recent", to_follow = False):
     """
         Favorites tweets that match a certain phrase (hashtag, word, etc.)
     """
 
     all_favs = get_already_favs()
     ignored_users = get_ignore_users()
+    all_follows = get_do_not_follow_list()
     
     f_out = open(ALREADY_FAV_FILE, 'a')
+    f_out_follow = open(ALREADY_FOLLOWED_FILE, 'a')
 
     result = search_tweets(q, count, result_type)
 
     for tweet in result["statuses"]:
         try:
-
+            print(tweet["user"]["screen_name"])
 
             # don't favorite your own tweets
             if tweet["user"]["screen_name"] == TWITTER_HANDLE:
@@ -71,6 +76,9 @@ def auto_fav(q, count=100, result_type="recent"):
 
             add_favorite_to_file(tweet["id"], f_out)
 
+            if to_follow:
+                follow_user_by_tweet(tweet, all_follows, f_out_follow)
+
             result = t.favorites.create(_id=tweet["id"])
             print("favorited: %s" % (result["text"].encode("utf-8")))
 
@@ -81,6 +89,7 @@ def auto_fav(q, count=100, result_type="recent"):
             print("error in tweet id:" + str(tweet["id"]))
 
     f_out.close()
+    f_out_follow.close()
 
 def get_already_favs():
    return get_list_from_file(ALREADY_FAV_FILE)
@@ -174,6 +183,12 @@ def auto_follow(q, count=100, result_type="recent"):
             if "blocked" not in str(e).lower():
                 quit()
 
+def follow_user_by_tweet(tweet, do_not_follow, out_file):
+    if (tweet["user"]["screen_name"] != TWITTER_HANDLE and
+                    tweet["user"]["id"] not in do_not_follow):
+        print "following: " + tweet["user"]["screen_name"]
+        add_favorite_to_file(tweet["user"]["id"], out_file) #manipulating existing function
+        t.friendships.create(user_id=tweet["user"]["id"], follow=False)
 
 def auto_follow_followers_for_user(user_screen_name, count=100):
     """
@@ -209,7 +224,6 @@ def auto_follow_followers():
             t.friendships.create(user_id=user_id, follow=False)
         except Exception as e:
             print("error: %s" % (str(e)))
-
 
 def auto_unfollow_nonfollowers():
     """
